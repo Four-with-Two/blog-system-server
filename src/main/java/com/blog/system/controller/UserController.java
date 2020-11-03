@@ -85,4 +85,28 @@ public class UserController {
         return JSON.toJSONString(sendStringDTO);
     }
 
+    @GetMapping("/get/{id}")
+    public String get(@RequestHeader("token") String token,@PathVariable("id") int id) {
+        if (token == null || !token.equals(acceptToken)) return null;
+        User findUser=userMapper.findByID(id);
+        if(findUser!=null) {
+            SendUserDTO sendUserDTO = new SendUserDTO();
+            sendUserDTO.setCode(true);
+            sendUserDTO.setUser_name(findUser.getUser_name());
+            sendUserDTO.setMail(findUser.getMail());
+            sendUserDTO.setNick_name(findUser.getNick_name());
+            sendUserDTO.setGender(findUser.getGender());
+            sendUserDTO.setBirthday(findUser.getBirthday());
+            sendUserDTO.setBio(findUser.getBio());
+            sendUserDTO.setAvatar_url(findUser.getAvatar_url());
+            sendUserDTO.setPhone(findUser.getPhone());
+            return JSON.toJSONString(sendUserDTO);
+        }
+        else {
+            SendStringDTO sendStringDTO=new SendStringDTO();
+            sendStringDTO.setCode(false);
+            sendStringDTO.setString("The account does not exist");
+            return JSON.toJSONString(sendStringDTO);
+        }
+    }
 }

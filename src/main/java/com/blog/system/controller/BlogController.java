@@ -5,7 +5,6 @@ import com.blog.system.dto.SendBlogDTO;
 import com.blog.system.dto.SendStringDTO;
 import com.blog.system.mapper.BlogMapper;
 import com.blog.system.model.Blog;
-import com.blog.system.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -49,7 +48,6 @@ public class BlogController {
         }
         SendBlogDTO sendBlogDTO=new SendBlogDTO();
         sendBlogDTO.setCode(true);
-        sendBlogDTO.setId(findBlog.getId());
         sendBlogDTO.setAuthor(findBlog.getAuthor());
         sendBlogDTO.setTitle(findBlog.getTitle());
         sendBlogDTO.setContent(findBlog.getContent());
