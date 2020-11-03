@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.*;
 @Mapper
 public interface BlogMapper {
 
-    @Insert("insert into blog (title,essay,bio,release_time) values (#{title},#{essay},#{bio},#{release_time})")
+    @Insert("insert into blog (author,title,content,summary,publish_date,update_date) values (#{author},#{title},#{content},#{summary},#{publish_date},#{update_date})")
     void insert(Blog blog);
 
     @Select("select * from blog where id=#{id}")
@@ -15,6 +15,6 @@ public interface BlogMapper {
     @Delete("delete from blog where id=#{id}")
     void delete(@Param("id") int id);
 
-    @Update("update blog set title=#{title},essay=#{essay},bio=#{bio} where id=#{id}")
+    @Update("update blog set title=#{title},content=#{content},summary=#{summary},update_date=#{update_date} where id=#{id}")
     void update(Blog blog);
 }

@@ -3,7 +3,7 @@ package com.blog.system.dto;
 import lombok.Data;
 
 @Data
-public class SendDTO {
+public class SendStringDTO {
     private boolean code;
-    private Object object;
+    private String string;
 }

@@ -73,7 +73,7 @@
                 <configuration>
                     <url>jdbc:mysql://localhost:3306/test</url>
                     <user>root</user>
-                    <password>123</password>
+                    <password>666666</password>
                 </configuration>
                 <dependencies>
                     <dependency>

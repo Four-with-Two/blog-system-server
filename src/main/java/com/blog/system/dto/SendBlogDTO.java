@@ -1,9 +1,10 @@
-package com.blog.system.model;
+package com.blog.system.dto;
 
 import lombok.Data;
 
 @Data
-public class Blog {
+public class SendBlogDTO {
+    private boolean code;
     private int id;
     private int author;
     private String title;
