@@ -21,7 +21,7 @@ public class BlogService {
 
     @Autowired
     UserMapper userMapper;
-
+    //从数据库中获取一篇博客并组合其作者部分信息
     public SendBlogDTO get(int id) {
         Blog findBlog = blogMapper.findByID(id);
         if (findBlog == null) return null;
@@ -40,7 +40,7 @@ public class BlogService {
         sendBlogDTO.setUpdate_date(findBlog.getUpdate_date());
         return sendBlogDTO;
     }
-
+    //从数据库中获取多篇博客并组合其作者部分信息
     private List<BlogsDTO> combine(List<Blog> blogList, int id) {
         List<BlogsDTO> blogsDTOList = new ArrayList<BlogsDTO>();
         User user = null;
@@ -64,7 +64,7 @@ public class BlogService {
         }
         return blogsDTOList;
     }
-
+    //获取所有博客信息
     public SendBlogsDTO getAll(int page) {
         SendBlogsDTO sendBlogsDTO = new SendBlogsDTO();
         sendBlogsDTO.setCode(true);
@@ -75,7 +75,7 @@ public class BlogService {
         sendBlogsDTO.setBlogsDTOList(blogsDTOList);
         return sendBlogsDTO;
     }
-
+    //获取对应id的博客信息
     public SendBlogsDTO getPersonal(int id, int page) {
         User user = userMapper.findByID(id);
         SendBlogsDTO sendBlogsDTO = new SendBlogsDTO();

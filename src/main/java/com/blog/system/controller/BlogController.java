@@ -31,7 +31,7 @@ public class BlogController {
 
     @Autowired
     UserMapper userMapper;
-
+    //写博客:将新博客写入数据库中，检查作者存不存在，不存在则返回错误信息
     @PostMapping("/newBlog")
     public String newBlog(@RequestHeader("token") String token, @RequestBody Blog blog) {
         if (token == null || !token.equals(acceptToken)) return null;
@@ -50,7 +50,7 @@ public class BlogController {
         sendStringDTO.setStr("OK");
         return JSON.toJSONString(sendStringDTO);
     }
-
+    //获取某篇博客:获取数据库中对应博客id的博客并整合部分作者信息，若对应博客id的博客不存在则返回错误信息
     @GetMapping("/get/{id}")
     public String get(@RequestHeader("token") String token, @PathVariable("id") int id) {
         if (token == null || !token.equals(acceptToken)) return null;
@@ -63,7 +63,7 @@ public class BlogController {
         }
         return JSON.toJSONString(sendBlogDTO);
     }
-
+    //获取某个用户的博客:从数据库中获取对应用户id的博客，需要指定页数，返回List数据结构，按发布时间排序
     @GetMapping("/get/personal")
     public String getPersonal(@RequestHeader("token") String token, @RequestParam("id") int id, @RequestParam("page") int page) {
         if (token == null || !token.equals(acceptToken)) return null;
@@ -75,14 +75,14 @@ public class BlogController {
         }
         return JSON.toJSONString(sendBlogsDTO);
     }
-
+    //获取所有用户的博客:从数据库中获取所有博客，需要指定页数，返回List数据结构，按发布时间排序
     @GetMapping("/get/all")
     public String getAll(@RequestHeader("token") String token, @RequestParam("page") int page) {
         if (token == null || !token.equals(acceptToken)) return null;
         SendBlogsDTO sendBlogsDTO = blogService.getAll(page);
         return JSON.toJSONString(sendBlogsDTO);
     }
-
+    //计数某个用户的博客数量:从数据库中获取对应用户id的博客并计数，并返回博客总数和页数(每页10条信息)
     @GetMapping("/count/personal")
     public String getPersonal(@RequestHeader("token") String token, @RequestParam("id") int id) {
         if (token == null || !token.equals(acceptToken)) return null;
@@ -92,7 +92,7 @@ public class BlogController {
         sendCountDTO.setPage((sendCountDTO.getCnt() + 9) / 10);
         return JSON.toJSONString(sendCountDTO);
     }
-
+    //计数所有的博客数量:从数据库中获取所有博客并计数，并返回博客总数和页数(每页10条信息)
     @GetMapping("/count/all")
     public String countAll(@RequestHeader("token") String token) {
         if (token == null || !token.equals(acceptToken)) return null;
@@ -102,7 +102,7 @@ public class BlogController {
         sendCountDTO.setPage((sendCountDTO.getCnt() + 9) / 10);
         return JSON.toJSONString(sendCountDTO);
     }
-
+    //删除博客:删除数据库中对应博客id的博客信息
     @GetMapping("/delete")
     public String delete(@RequestHeader("token") String token, @RequestParam("id") int id) {
         if (token == null || !token.equals(acceptToken)) return null;
@@ -112,7 +112,7 @@ public class BlogController {
         sendStringDTO.setStr("OK");
         return JSON.toJSONString(sendStringDTO);
     }
-
+    //修改博客:修改数据库中对应博客id的博客信息，若博客不存在则返回错误信息
     @PostMapping("/modify/{id}")
     public String modify(@RequestHeader("token") String token, @PathVariable("id") int id, @RequestBody Blog blog) {
         if (token == null || !token.equals(acceptToken)) return null;

@@ -20,6 +20,7 @@ public class UserController {
     @Value("${acceptToken}")
     private String acceptToken;
 
+    //用户登录功能:验证成功返回用户id 验证失败返回错误信息
     @PostMapping("/login")
     public String login(@RequestHeader("token") String token, @RequestBody User user) {
         if (token == null || !token.equals(acceptToken)) return null;
@@ -50,7 +51,7 @@ public class UserController {
         }
 
     }
-
+    //用户注册功能:若注册成功则将用户信息添加进数据库 返回注册状态
     @PostMapping("/register")
     public String register(@RequestHeader("token") String token, @RequestBody User user) {
         if (token == null || !token.equals(acceptToken)) return null;
@@ -68,22 +69,18 @@ public class UserController {
         return JSON.toJSONString(sendStringDTO);
     }
 
+    //删除用户:删除数据库中对应id的用户信息
     @GetMapping("/delete")
     public String delete(@RequestHeader("token") String token, @RequestParam("id") int id) {
         if (token == null || !token.equals(acceptToken)) return null;
-        User findUser = userMapper.findByID(id);
         SendStringDTO sendStringDTO = new SendStringDTO();
-        if (findUser == null) {
-            sendStringDTO.setCode(false);
-            sendStringDTO.setStr("The account does not exist");
-        } else {
-            userMapper.delete(id);
-            sendStringDTO.setCode(true);
-            sendStringDTO.setStr("OK");
-        }
+        userMapper.delete(id);
+        sendStringDTO.setCode(true);
+        sendStringDTO.setStr("OK");
         return JSON.toJSONString(sendStringDTO);
     }
 
+    //获取某用户信息:获取数据库中对应id的用户信息并返回，若不存在则返回错误信息
     @GetMapping("/get/{id}")
     public String get(@RequestHeader("token") String token,@PathVariable("id") int id) {
         if (token == null || !token.equals(acceptToken)) return null;
