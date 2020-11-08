@@ -8,7 +8,6 @@ public class SendUserDTO {
     private int id;
     private String user_name;
     private String mail;
-    private String password;
     private String nick_name;
     private String birthday;
     private String gender;

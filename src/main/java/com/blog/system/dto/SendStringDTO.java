@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class SendStringDTO {
     private boolean code;
-    private String string;
+    private String str;
 }

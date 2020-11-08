@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
-
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -27,7 +26,7 @@ public class UserController {
         if (user.getMail() == null && user.getUser_name() == null || user.getPassword() == null) {
             SendStringDTO sendStringDTO=new SendStringDTO();
             sendStringDTO.setCode(false);
-            sendStringDTO.setString("format error");
+            sendStringDTO.setStr("format error");
             return JSON.toJSONString(sendStringDTO);
         }
         User findUser;
@@ -36,7 +35,7 @@ public class UserController {
         if (findUser == null) {
             SendStringDTO sendStringDTO = new SendStringDTO();
             sendStringDTO.setCode(false);
-            sendStringDTO.setString("The account does not exist");
+            sendStringDTO.setStr("The account does not exist");
             return JSON.toJSONString(sendStringDTO);
         } else if (findUser.getPassword().equals(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()))) {
             SendUserDTO sendUserDTO = new SendUserDTO();
@@ -46,14 +45,14 @@ public class UserController {
         } else {
             SendStringDTO sendStringDTO = new SendStringDTO();
             sendStringDTO.setCode(false);
-            sendStringDTO.setString("Incorrect password");
+            sendStringDTO.setStr("Incorrect password");
             return JSON.toJSONString(sendStringDTO);
         }
 
     }
 
     @PostMapping("/register")
-    public String registration(@RequestHeader("token") String token, @RequestBody User user) {
+    public String register(@RequestHeader("token") String token, @RequestBody User user) {
         if (token == null || !token.equals(acceptToken)) return null;
         User findUser = userMapper.findByMail(user.getMail());
         SendStringDTO sendStringDTO = new SendStringDTO();
@@ -61,10 +60,10 @@ public class UserController {
             user.setPassword(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()));
             userMapper.insertUser(user);
             sendStringDTO.setCode(true);
-            sendStringDTO.setString("OK");
+            sendStringDTO.setStr("OK");
         } else {
             sendStringDTO.setCode(false);
-            sendStringDTO.setString("The account already exists");
+            sendStringDTO.setStr("The account already exists");
         }
         return JSON.toJSONString(sendStringDTO);
     }
@@ -76,11 +75,11 @@ public class UserController {
         SendStringDTO sendStringDTO = new SendStringDTO();
         if (findUser == null) {
             sendStringDTO.setCode(false);
-            sendStringDTO.setString("The account does not exist");
+            sendStringDTO.setStr("The account does not exist");
         } else {
             userMapper.delete(id);
             sendStringDTO.setCode(true);
-            sendStringDTO.setString("OK");
+            sendStringDTO.setStr("OK");
         }
         return JSON.toJSONString(sendStringDTO);
     }
@@ -105,7 +104,7 @@ public class UserController {
         else {
             SendStringDTO sendStringDTO=new SendStringDTO();
             sendStringDTO.setCode(false);
-            sendStringDTO.setString("The account does not exist");
+            sendStringDTO.setStr("The account does not exist");
             return JSON.toJSONString(sendStringDTO);
         }
     }
