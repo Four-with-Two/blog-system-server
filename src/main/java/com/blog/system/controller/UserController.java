@@ -27,7 +27,7 @@ public class UserController {
         if (user.getMail() == null && user.getUser_name() == null || user.getPassword() == null) {
             SendStringDTO sendStringDTO=new SendStringDTO();
             sendStringDTO.setCode(false);
-            sendStringDTO.setStr("format error");
+            sendStringDTO.setMessage("format error");
             return JSON.toJSONString(sendStringDTO);
         }
         User findUser;
@@ -36,7 +36,7 @@ public class UserController {
         if (findUser == null) {
             SendStringDTO sendStringDTO = new SendStringDTO();
             sendStringDTO.setCode(false);
-            sendStringDTO.setStr("The account does not exist");
+            sendStringDTO.setMessage("The account does not exist");
             return JSON.toJSONString(sendStringDTO);
         } else if (findUser.getPassword().equals(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()))) {
             SendUserDTO sendUserDTO = new SendUserDTO();
@@ -46,7 +46,7 @@ public class UserController {
         } else {
             SendStringDTO sendStringDTO = new SendStringDTO();
             sendStringDTO.setCode(false);
-            sendStringDTO.setStr("Incorrect password");
+            sendStringDTO.setMessage("Incorrect password");
             return JSON.toJSONString(sendStringDTO);
         }
 
@@ -61,10 +61,10 @@ public class UserController {
             user.setPassword(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()));
             userMapper.insertUser(user);
             sendStringDTO.setCode(true);
-            sendStringDTO.setStr("OK");
+            sendStringDTO.setMessage("OK");
         } else {
             sendStringDTO.setCode(false);
-            sendStringDTO.setStr("The account already exists");
+            sendStringDTO.setMessage("The account already exists");
         }
         return JSON.toJSONString(sendStringDTO);
     }
@@ -76,7 +76,7 @@ public class UserController {
         SendStringDTO sendStringDTO = new SendStringDTO();
         userMapper.delete(id);
         sendStringDTO.setCode(true);
-        sendStringDTO.setStr("OK");
+        sendStringDTO.setMessage("OK");
         return JSON.toJSONString(sendStringDTO);
     }
 
@@ -101,7 +101,7 @@ public class UserController {
         else {
             SendStringDTO sendStringDTO=new SendStringDTO();
             sendStringDTO.setCode(false);
-            sendStringDTO.setStr("The account does not exist");
+            sendStringDTO.setMessage("The account does not exist");
             return JSON.toJSONString(sendStringDTO);
         }
     }

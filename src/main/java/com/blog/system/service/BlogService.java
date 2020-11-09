@@ -43,53 +43,37 @@ public class BlogService {
     //从数据库中获取多篇博客并组合其作者部分信息
     private List<BlogsDTO> combine(List<Blog> blogList, int id) {
         List<BlogsDTO> blogsDTOList = new ArrayList<BlogsDTO>();
-        User user = null;
-        if (id > 0) user = userMapper.findByID(id);
-        for (Blog blog : blogList) {
-            BlogsDTO blogsDTO = new BlogsDTO();
-            blogsDTO.setId(blog.getId());
-            if (id <= 0) {
-                user = userMapper.findByID(blog.getAuthor());
-                blogsDTO.setAuthor(user.getId());
+        if(blogList!=null&&blogList.size()>0) {
+            User user = null;
+            if (id > 0) user = userMapper.findByID(id);
+            for (Blog blog : blogList) {
+                BlogsDTO blogsDTO = new BlogsDTO();
+                blogsDTO.setId(blog.getId());
+                if (id <= 0) {
+                    user = userMapper.findByID(blog.getAuthor());
+                    blogsDTO.setAuthor(user.getId());
+                }
+                blogsDTO.setAvatar_url(user.getAvatar_url());
+                if (user.getNick_name() != null && user.getNick_name().length() == 0)
+                    blogsDTO.setName(user.getNick_name());
+                else blogsDTO.setName(user.getUser_name());
+                blogsDTO.setTitle(blog.getTitle());
+                blogsDTO.setSummary(blog.getSummary());
+                blogsDTO.setPublish_date(blog.getPublish_date());
+                blogsDTO.setUpdate_date(blog.getUpdate_date());
+                blogsDTOList.add(blogsDTO);
             }
-            blogsDTO.setAvatar_url(user.getAvatar_url());
-            if (user.getNick_name() != null && user.getNick_name().length() == 0)
-                blogsDTO.setName(user.getNick_name());
-            else blogsDTO.setName(user.getUser_name());
-            blogsDTO.setTitle(blog.getTitle());
-            blogsDTO.setSummary(blog.getSummary());
-            blogsDTO.setPublish_date(blog.getPublish_date());
-            blogsDTO.setUpdate_date(blog.getUpdate_date());
-            blogsDTOList.add(blogsDTO);
         }
         return blogsDTOList;
     }
-    //获取所有博客信息
-    public SendBlogsDTO getAll(int page) {
+    //获取多组博客信息 用户id=0时获取所有用户
+    public SendBlogsDTO getBlogs(int id, int page) {
         SendBlogsDTO sendBlogsDTO = new SendBlogsDTO();
         sendBlogsDTO.setCode(true);
-        List<Blog> blogList = blogMapper.findAll(1, 10);
-        List<BlogsDTO> blogsDTOList = null;
-        if (blogList != null && blogList.size() > 0)
-            blogsDTOList = combine(blogList, 0);
-        sendBlogsDTO.setBlogsDTOList(blogsDTOList);
-        return sendBlogsDTO;
-    }
-    //获取对应id的博客信息
-    public SendBlogsDTO getPersonal(int id, int page) {
-        User user = userMapper.findByID(id);
-        SendBlogsDTO sendBlogsDTO = new SendBlogsDTO();
-        if (user == null) {
-            sendBlogsDTO.setCode(false);
-            sendBlogsDTO.setBlogsDTOList(null);
-        } else {
-            sendBlogsDTO.setCode(true);
-            List<Blog> blogList = blogMapper.findByAuthorID(id, 1, 10);
-            List<BlogsDTO> blogsDTOList = null;
-            if (blogList != null && blogList.size() > 0)
-                blogsDTOList = combine(blogList, id);
-            sendBlogsDTO.setBlogsDTOList(blogsDTOList);
-        }
+        List<Blog> blogList;
+        if(id>0) blogList=blogMapper.findByAuthorID(id,(page-1)*10, 10);
+        else blogList=blogMapper.findAll((page - 1) * 10, 10);
+        sendBlogsDTO.setBlogsDTOList(combine(blogList, id));
         return sendBlogsDTO;
     }
 }
