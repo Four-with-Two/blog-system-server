@@ -20,11 +20,11 @@ public interface BlogMapper {
     @Select("select count(*) from blog")
     int countAll();
 
-    @Select("select * from blog where author=#{author} limit (#{page}-1)*#{size},#{size} order by publish_date desc")
-    List<Blog> findByAuthorID(@Param("author") int author,@Param("page") int page,@Param("size") int size);
+    @Select("select * from blog where author=#{author} order by publish_date desc limit #{offset},#{size}")
+    List<Blog> findByAuthorID(@Param("author") int author,@Param("offset") int offset,@Param("size") int size);
 
-    @Select("select * from blog limit (#{page}-1)*#{size},#{size} order by publish_date desc")
-    List<Blog> findAll(@Param("page") int page,@Param("size") int size);
+    @Select("select * from blog order by publish_date desc limit #{offset},#{size}")
+    List<Blog> findAll(@Param("offset") int offset,@Param("size") int size);
 
     @Delete("delete from blog where id=#{id}")
     void delete(@Param("id") int id);
