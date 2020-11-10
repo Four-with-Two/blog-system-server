@@ -7,6 +7,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
@@ -16,8 +17,9 @@ import java.util.Map;
  * @author GGXian
  * @project MiniBlog
  * @createTime 2020/10/26 15:42
- * @description 增加数据库连接池配置
+ * @description 数据库连接池配置
  **/
+@EnableTransactionManagement
 @EnableConfigurationProperties
 @Configuration
 public class DruidConfig {

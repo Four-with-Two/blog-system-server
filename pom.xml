@@ -17,6 +17,7 @@
     <properties>
         <java.version>1.8</java.version>
         <druid-starter.version>1.2.1</druid-starter.version>
+        <redis-starter.version>2.3.3.RELEASE</redis-starter.version>
     </properties>
 
     <dependencies>
@@ -28,6 +29,11 @@
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
             <version>2.1.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <version>${redis-starter.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
