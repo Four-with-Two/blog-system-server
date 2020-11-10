@@ -1,13 +1,13 @@
-package com.blog.system.model;
+package com.blog.system.dto;
 
 import lombok.Data;
 
 @Data
-public class User {
+public class SendUserDTO {
+    private boolean code;
     private int id;
     private String user_name;
     private String mail;
-    private String password;
     private String nick_name;
     private String birthday;
     private String gender;
