@@ -16,6 +16,8 @@
 
     <properties>
         <java.version>1.8</java.version>
+        <druid-starter.version>1.2.1</druid-starter.version>
+        <redis-starter.version>2.3.3.RELEASE</redis-starter.version>
     </properties>
 
     <dependencies>
@@ -29,6 +31,11 @@
             <version>2.1.3</version>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <version>${redis-starter.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.16</version>
@@ -39,6 +46,11 @@
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>1.2.74</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid-spring-boot-starter</artifactId>
+            <version>${druid-starter.version}</version>
         </dependency>
 
         <dependency>
