@@ -21,7 +21,7 @@ public interface UserMapper {
     User findBySession_key(@Param("session_key") String user_name);
 
     @Update("update table user set password=#{password} where user_name=#{user_name}")
-    void  updateBySession_key(@Param("session_key") String user_name,@Param("password")String password);
+    void  updateByUser_name(@Param("user_name") String user_name,@Param("newPassword")String password);
 
     @Delete("delete from user where id=#{id}")
     void delete(@Param("id") int id);

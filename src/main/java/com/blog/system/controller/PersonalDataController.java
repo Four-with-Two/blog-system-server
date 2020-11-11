@@ -1,14 +1,18 @@
 package com.blog.system.controller;
 
-import com.blog.system.dto.KeyPassDTO;
-import com.blog.system.dto.SendParamDTO;
+import com.blog.system.dto.*;
 import com.blog.system.mapper.PersonalDataMapper;
 import com.blog.system.mapper.UserMapper;
 import com.blog.system.model.PersonalData;
 import com.blog.system.model.User;
+import com.blog.system.service.MyDataService;
+import com.blog.system.service.OtherDataService;
+import com.blog.system.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/my_data")
@@ -20,25 +24,40 @@ public class PersonalDataController {
     @Autowired(required = false)
     private PersonalDataMapper personalDataMapper;
 
+    @Autowired
+    private OtherDataService otherDataService;
+
+    @Autowired
+    private MyDataService myDataService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
     /**
      * 初始化或修改密码
-     * @param keyPassDTO
+     * @param token
+     * @param userPassDTO
      * @return
      */
     @PatchMapping("/pwdAlteration")
-    SendParamDTO pwdAlteration(@RequestBody KeyPassDTO keyPassDTO){
-        User user=userMapper.findBySession_key(keyPassDTO.getSession_key());
-        SendParamDTO CommonResult=new SendParamDTO();
-        if(user!=null){
-            userMapper.updateBySession_key(keyPassDTO.getSession_key(),keyPassDTO.getPassword());
-            CommonResult.setCode("6666");
-            CommonResult.setMessage("操作成功！");
-            return CommonResult;
+    CommonResult pwdAlteration(@RequestHeader("token") String token,
+                               @RequestBody UserPassDTO userPassDTO){
+        CommonResult commonResult=new CommonResult();
+        User user=userMapper.findByUser_name(userPassDTO.getUser_name());
+        Boolean bool = jwtUtil.isVerify(token,user);
+        if(bool==true){
+            userMapper.updateByUser_name(user.getUser_name(),userPassDTO.getPassword());
+            long ttlMillis=System.currentTimeMillis();
+            String newToken=jwtUtil.createJWT(ttlMillis,user);
+            commonResult.setData(newToken);
+            commonResult.setCode("6666");
+            commonResult.setMessage("操作成功！");
+            return commonResult;
         }
         else{
-            CommonResult.setCode("1003");
-            CommonResult.setMessage("用户名不存在！");
-            return CommonResult;
+            commonResult.setCode("1006");
+            commonResult.setMessage("用户无有效令牌!");
+            return commonResult;
         }
     }
 
@@ -46,61 +65,93 @@ public class PersonalDataController {
      * 获取其他用户的个人资料
      * @param token
      * @param user_name
+     * @param newUser_name
      * @return
      */
     @GetMapping("/exhibition/{username}")
-    SendParamDTO<PersonalData> showOtherData(@RequestHeader("token")String token,
-                                             @PathVariable("username")String user_name){
-        SendParamDTO CommonResult=new SendParamDTO();
-        PersonalData personalData=personalDataMapper.findByUser_name(user_name);
-        if(personalData!=null){
-            CommonResult.setObject(personalData);
-            CommonResult.setCode("6666");
-            CommonResult.setMessage("操作成功！");
-            return CommonResult;
+    CommonResult<PersonalData> showOtherData(@RequestHeader("token")String token,
+                                             @RequestBody String user_name,
+                                             @PathVariable("username") String newUser_name){
+        CommonResult commonResult=new CommonResult();
+        User user=userMapper.findByUser_name(user_name);
+        Boolean bool = jwtUtil.isVerify(token,user);
+        if(bool==true){
+            PersonalData personalData=personalDataMapper.findByNewUser_name(newUser_name);
+            if(personalData!=null){
+                OtherDataDTO otherDataDTO =new OtherDataDTO();
+                otherDataDTO=otherDataService.getOtherData(personalData);
+                commonResult.setData(otherDataDTO);
+                commonResult.setCode("6666");
+                commonResult.setMessage("操作成功！");
+                return commonResult;
+            }
+            else{
+                commonResult.setCode("1003");
+                commonResult.setMessage("用户名不存在！");
+                return commonResult;
+            }
         }
         else{
-            CommonResult.setCode("1003");
-            CommonResult.setMessage("用户名不存在！");
-            return CommonResult;
+            commonResult.setCode("1006");
+            commonResult.setMessage("用户无有效令牌!");
+            return commonResult;
+        }
+
+    }
+
+    /**
+     *  获取自己的个人资料
+     * @param token
+     * @param user_name
+     * @return
+     */
+    @GetMapping("/exhibition")
+    CommonResult<PersonalData> showMyData(@RequestHeader("token")String token,
+                                          @RequestBody String user_name){
+        CommonResult commonResult=new CommonResult();
+        User user=userMapper.findByUser_name(user_name);
+        boolean bool=jwtUtil.isVerify(token,user);
+        if(bool==true){
+            PersonalData personalData=personalDataMapper.findByUser_name(user_name);
+            if(personalData!=null){
+                MyDataDTO myDataDTO=myDataService.getMyData(personalData);
+                commonResult.setData(myDataDTO);
+                commonResult.setCode("6666");
+                commonResult.setMessage("操作成功！");
+                return commonResult;
+            }
+            else{
+                commonResult.setCode("1003");
+                commonResult.setMessage("用户名不存在！");
+                return commonResult;
+            }
+        }
+        else{
+            commonResult.setCode("1006");
+            commonResult.setMessage("用户无有效令牌!");
+            return commonResult;
         }
     }
 
     /**
-     * 获取自己的个人资料
-     * @param keyPassDTO
+     * 修改个人资料
+     * @param personalData
      * @return
      */
-    @GetMapping("/exhibition")
-    SendParamDTO<PersonalData> showMyData(@RequestBody KeyPassDTO keyPassDTO){
-        SendParamDTO CommonResult=new SendParamDTO();
-        PersonalData personalData=personalDataMapper.findBySession_key(keyPassDTO.getSession_key());
-        if(personalData!=null){
-            CommonResult.setObject(personalData);
-            CommonResult.setCode("6666");
-            CommonResult.setMessage("操作成功！");
-            return CommonResult;
-        }
-        else{
-            CommonResult.setCode("1003");
-            CommonResult.setMessage("用户名不存在！");
-            return CommonResult;
-        }
-    }
-
     @PutMapping("/alteration")
-    SendParamDTO alteration(@RequestBody PersonalData personalData){
-        SendParamDTO CommonResult=new SendParamDTO();
-        PersonalData personalData2=personalDataMapper.findByUser_name(personalData.getUser_name());
+    CommonResult alteration(@RequestBody PersonalData personalData){
+        CommonResult commonResult=new CommonResult();
+        PersonalData personalData1=personalDataMapper.findByUser_name(personalData.getUser_name());
         if(personalData!=null){
-            CommonResult.setCode("6666");
-            CommonResult.setMessage("操作成功！");
-            return CommonResult;
+            personalDataMapper.updatePersonalData(personalData);
+            commonResult.setCode("6666");
+            commonResult.setMessage("操作成功！");
+            return commonResult;
         }
         else{
-            CommonResult.setCode("1003");
-            CommonResult.setMessage("用户名不存在！");
-            return CommonResult;
+            commonResult.setCode("1003");
+            commonResult.setMessage("用户名不存在！");
+            return commonResult;
         }
     }
 }
