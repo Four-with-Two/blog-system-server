@@ -17,6 +17,12 @@ public interface UserMapper {
     @Insert("insert into user (user_name,mail,password) values (#{user_name},#{mail},#{password})")
     void insertUser(User user);
 
+    @Select("select * from user where user_name=#{user_name}")
+    User findBySession_key(@Param("session_key") String user_name);
+
+    @Update("update table user set password=#{password} where user_name=#{user_name}")
+    void  updateBySession_key(@Param("session_key") String user_name,@Param("password")String password);
+
     @Delete("delete from user where id=#{id}")
     void delete(@Param("id") int id);
 }
