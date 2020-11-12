@@ -5,6 +5,10 @@ import org.apache.ibatis.annotations.*;
 
 @Mapper
 public interface UserMapper {
+
+    @Select("select avatar_url from user where user_name=#{user_name}")
+    String getAvatar(@Param("user_name") String user_name);
+
     @Select("select * from user where id=#{id}")
     User findByID(@Param("id") int id);
 
@@ -21,7 +25,10 @@ public interface UserMapper {
     User findBySession_key(@Param("session_key") String user_name);
 
     @Update("update table user set password=#{password} where user_name=#{user_name}")
-    void  updateByUser_name(@Param("user_name") String user_name,@Param("newPassword")String password);
+    void  updateByUser_name(@Param("user_name") String user_name,@Param("password")String password);
+
+    @Update("update table user set avatau_url=#{avatar_url} where user_name=#{user_name}")
+    void updatePicture(@Param("avatar_url")String avatar_url,@Param("user_name")String user_name);
 
     @Delete("delete from user where id=#{id}")
     void delete(@Param("id") int id);

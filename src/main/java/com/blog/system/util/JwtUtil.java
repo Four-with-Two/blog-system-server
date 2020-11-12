@@ -5,6 +5,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -17,6 +18,9 @@ import java.util.UUID;
  */
 @Component
 public class JwtUtil {
+
+    @Value("${acceptToken}")
+    private String acceptToken;
 
     /**
      * 用户登录成功后生成Jwt
@@ -33,7 +37,7 @@ public class JwtUtil {
 
         Map<String,Object> claims=new HashMap<String,Object>();
         claims.put("user_name",user.getUser_name());
-        String key=user.getPassword();
+        String key=acceptToken;
         String subject=user.getUser_name();
 
         JwtBuilder builder= Jwts.builder()
@@ -53,12 +57,11 @@ public class JwtUtil {
     /**
      * Token的解密
      * @param token 加密后的token
-     * @param user  用户的对象
      * @return
      */
-    public Claims parseJWT(String token, User user) {
+    public Claims parseJWT(String token) {
         //签名秘钥，和生成的签名的秘钥一模一样
-        String key = user.getPassword();
+        String key = acceptToken;
 
         //得到DefaultJwtParser
         Claims claims = Jwts.parser()
@@ -73,12 +76,11 @@ public class JwtUtil {
      * 校验token
      * 在这里可以使用官方的校验，我这里校验的是token中携带的密码于数据库一致的话就校验通过
      * @param token
-     * @param user
      * @return
      */
-    public Boolean isVerify(String token, User user) {
+    public Boolean isVerify(String token) {
         //签名秘钥，和生成的签名的秘钥一模一样
-        String key = user.getPassword();
+        String key = acceptToken;
 
         //得到DefaultJwtParser
         Claims claims = Jwts.parser()
@@ -87,7 +89,7 @@ public class JwtUtil {
                 //设置需要解析的jwt
                 .parseClaimsJws(token).getBody();
 
-        if (claims.get("password").equals(user.getPassword())) {
+        if (claims.get("password").equals(acceptToken)) {
             return true;
         }
         return false;

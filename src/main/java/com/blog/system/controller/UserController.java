@@ -3,6 +3,7 @@ package com.blog.system.controller;
 import com.alibaba.fastjson.JSON;
 import com.blog.system.dto.SendStringDTO;
 import com.blog.system.dto.SendUserDTO;
+import com.blog.system.mapper.PersonalDataMapper;
 import com.blog.system.mapper.UserMapper;
 import com.blog.system.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,9 @@ public class UserController {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired(required = false)
+    private PersonalDataMapper personalDataMapper;
 
     @Value("${acceptToken}")
     private String acceptToken;
@@ -60,6 +64,7 @@ public class UserController {
         if (findUser == null) {
             user.setPassword(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()));
             userMapper.insertUser(user);
+            personalDataMapper.inserUser(user);
             sendStringDTO.setCode(true);
             sendStringDTO.setMessage("OK");
         } else {
@@ -74,7 +79,9 @@ public class UserController {
     public String delete(@RequestHeader("token") String token, @RequestParam("id") int id) {
         if (token == null || !token.equals(acceptToken)) return null;
         SendStringDTO sendStringDTO = new SendStringDTO();
+        User user=userMapper.findByID(id);
         userMapper.delete(id);
+        personalDataMapper.delete(user.getUser_name());
         sendStringDTO.setCode(true);
         sendStringDTO.setMessage("OK");
         return JSON.toJSONString(sendStringDTO);

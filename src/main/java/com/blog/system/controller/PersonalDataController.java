@@ -8,6 +8,7 @@ import com.blog.system.model.User;
 import com.blog.system.service.MyDataService;
 import com.blog.system.service.OtherDataService;
 import com.blog.system.util.JwtUtil;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,7 +45,7 @@ public class PersonalDataController {
                                @RequestBody UserPassDTO userPassDTO){
         CommonResult commonResult=new CommonResult();
         User user=userMapper.findByUser_name(userPassDTO.getUser_name());
-        Boolean bool = jwtUtil.isVerify(token,user);
+        Boolean bool = jwtUtil.isVerify(token);
         if(bool==true){
             userMapper.updateByUser_name(user.getUser_name(),userPassDTO.getPassword());
             long ttlMillis=System.currentTimeMillis();
@@ -65,18 +66,15 @@ public class PersonalDataController {
      * 获取其他用户的个人资料
      * @param token
      * @param user_name
-     * @param newUser_name
      * @return
      */
     @GetMapping("/exhibition/{username}")
     CommonResult<PersonalData> showOtherData(@RequestHeader("token")String token,
-                                             @RequestBody String user_name,
-                                             @PathVariable("username") String newUser_name){
+                                             @PathVariable("username") String user_name){
         CommonResult commonResult=new CommonResult();
-        User user=userMapper.findByUser_name(user_name);
-        Boolean bool = jwtUtil.isVerify(token,user);
+        Boolean bool = jwtUtil.isVerify(token);
         if(bool==true){
-            PersonalData personalData=personalDataMapper.findByNewUser_name(newUser_name);
+            PersonalData personalData=personalDataMapper.findByUser_name(user_name);
             if(personalData!=null){
                 OtherDataDTO otherDataDTO =new OtherDataDTO();
                 otherDataDTO=otherDataService.getOtherData(personalData);
@@ -102,16 +100,15 @@ public class PersonalDataController {
     /**
      *  获取自己的个人资料
      * @param token
-     * @param user_name
      * @return
      */
     @GetMapping("/exhibition")
-    CommonResult<PersonalData> showMyData(@RequestHeader("token")String token,
-                                          @RequestBody String user_name){
+    CommonResult<PersonalData> showMyData(@RequestHeader("token")String token){
         CommonResult commonResult=new CommonResult();
-        User user=userMapper.findByUser_name(user_name);
-        boolean bool=jwtUtil.isVerify(token,user);
+        boolean bool=jwtUtil.isVerify(token);
         if(bool==true){
+            Claims claims=jwtUtil.parseJWT(token);
+            String user_name=claims.get("user_name",String.class);
             PersonalData personalData=personalDataMapper.findByUser_name(user_name);
             if(personalData!=null){
                 MyDataDTO myDataDTO=myDataService.getMyData(personalData);
