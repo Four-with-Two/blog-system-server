@@ -1,5 +1,6 @@
 package com.blog.system.mapper;
 
+import com.blog.system.model.PersonalData;
 import com.blog.system.model.User;
 import org.apache.ibatis.annotations.*;
 
@@ -27,9 +28,14 @@ public interface UserMapper {
     @Update("update table user set password=#{password} where user_name=#{user_name}")
     void  updateByUser_name(@Param("user_name") String user_name,@Param("password")String password);
 
+    @Update("update table user set nick_name=#{nick_name},gender=#{gender},mail=#{mail},birthday=#{birthday},phone=#{phone}" +
+            "where user_name=#{user_name}")
+    void updataData(PersonalData personalData);
+
     @Update("update table user set avatau_url=#{avatar_url} where user_name=#{user_name}")
     void updatePicture(@Param("avatar_url")String avatar_url,@Param("user_name")String user_name);
 
     @Delete("delete from user where id=#{id}")
     void delete(@Param("id") int id);
+
 }

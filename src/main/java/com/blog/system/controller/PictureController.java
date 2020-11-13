@@ -4,14 +4,16 @@ import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.LineCaptcha;
 import cn.hutool.core.util.IdUtil;
 import com.blog.system.dto.CommonResult;
+import com.blog.system.dto.UrlUUIDDTO;
 import com.blog.system.mapper.UserMapper;
 import com.blog.system.util.JwtUtil;
 import com.blog.system.util.RedisUtil;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
@@ -37,23 +39,51 @@ public class PictureController {
      */
     @PostMapping("/avatar/upload")
     CommonResult<String> uploadPicture(@RequestHeader("token") String token,
-                                       @RequestBody File avatar){
+                                       @RequestParam("avatar")MultipartFile avatar){
         CommonResult commonResult=new CommonResult();
-        if(true==jwtUtil.isVerify(token)){
-            Claims claims=jwtUtil.parseJWT(token);
-            String user_name=claims.get("user_name",String.class);
-            String avatar_url=(avatar.toURI()).getPath();
-            userMapper.updatePicture(avatar_url,user_name);
-            commonResult.setData(avatar_url);
-            commonResult.setCode("6666");
-            commonResult.setMessage("操作成功！");
-            return commonResult;
+        if(jwtUtil.isVerify(token)){
+            if(!avatar.isEmpty()){
+                try{
+                    BufferedOutputStream out=new BufferedOutputStream(
+                            new FileOutputStream(new File(
+                                    avatar.getOriginalFilename())));
+                    out.write(avatar.getBytes());
+                    out.flush();
+                    out.close();
+                    commonResult.setCode("6666");
+                    commonResult.setMessage("操作成功！");
+                    return commonResult;
+                } catch (IOException e) {
+                    commonResult.setCode("2001");
+                    commonResult.setMessage("图片上传失败！");
+                    return commonResult;
+                }
+            }
+            else{
+                commonResult.setCode("2001");
+                commonResult.setMessage("图片上传失败！");
+                return commonResult;
+            }
         }
         else{
             commonResult.setCode("1006");
             commonResult.setMessage("用户无有效令牌!");
             return commonResult;
         }
+//        if(true==jwtUtil.isVerify(token)){
+//            String user_name=jwtUtil.parseJWT(token);
+//            String avatar_url=(avatar.toURI()).getPath();
+//            userMapper.updatePicture(avatar_url,user_name);
+//            commonResult.setData(avatar_url);
+//            commonResult.setCode("6666");
+//            commonResult.setMessage("操作成功！");
+//            return commonResult;
+//        }
+//        else{
+//            commonResult.setCode("1006");
+//            commonResult.setMessage("用户无有效令牌!");
+//            return commonResult;
+//        }
     }
 
     /**
@@ -66,9 +96,15 @@ public class PictureController {
     CommonResult changePicture(@RequestHeader("token") String token,
                                @RequestBody String avatar_url){
         CommonResult commonResult=new CommonResult();
+
+//        System.out.println("token:"+token);
+//        System.out.println("avatar_url"+avatar_url);
+//        commonResult.setCode("6666");
+//        commonResult.setMessage("操作成功！");
+//        return commonResult;
+
         if(true==jwtUtil.isVerify(token)){
-            Claims claims=jwtUtil.parseJWT(token);
-            String user_name=claims.get("user_name",String.class);
+            String user_name=jwtUtil.parseJWT(token);
             userMapper.updatePicture(avatar_url,user_name);
             commonResult.setCode("6666");
             commonResult.setMessage("操作成功！");
@@ -89,9 +125,16 @@ public class PictureController {
     @GetMapping("/avatar")
     CommonResult<String> getPicture(@RequestHeader("token") String token){
         CommonResult commonResult=new CommonResult();
+
+//        System.out.println("token"+token);
+//        String avatar_url="http://riyugo.com/i/2020/11/13/pfet0w.jpg";
+//        commonResult.setData(avatar_url);
+//        commonResult.setCode("6666");
+//        commonResult.setMessage("操作成功！");
+//        return commonResult;
+
         if(true==jwtUtil.isVerify(token)){
-            Claims claims=jwtUtil.parseJWT(token);
-            String user_name=claims.get("user_name",String.class);
+            String user_name=jwtUtil.parseJWT(token);
             String avatar_url=userMapper.getAvatar(user_name);
             commonResult.setData(avatar_url);
             commonResult.setCode("6666");
@@ -110,17 +153,19 @@ public class PictureController {
      * @return
      */
     @GetMapping("/captcha")
-    CommonResult<Map<String,URL>> getCaptcha() {
+    CommonResult<UrlUUIDDTO> getCaptcha() {
         CommonResult commonResult=new CommonResult();
-        LineCaptcha lineCaptcha = CaptchaUtil.createLineCaptcha(200, 100);
+        LineCaptcha lineCaptcha = CaptchaUtil.createLineCaptcha(112, 38);
         try {
-            Map<String,URL> temp = null;
-            URL captcha= new URL(lineCaptcha.toString());
+
+            URL captcha= new URL("http","/picture/captcha",80,lineCaptcha.toString());
             String verification_code=lineCaptcha.getCode();
             String simpleUUID = IdUtil.simpleUUID();
             redisUtil.set(simpleUUID,verification_code);
-            temp.put(simpleUUID,captcha);
-            commonResult.setData(temp);
+            UrlUUIDDTO urlUUIDDTO=new UrlUUIDDTO();
+            urlUUIDDTO.setUrl(captcha);
+            urlUUIDDTO.setUuid(simpleUUID);
+            commonResult.setData(urlUUIDDTO);
             commonResult.setCode("6666");
             commonResult.setMessage("操作成功！");
             return commonResult;
@@ -142,7 +187,7 @@ public class PictureController {
                               @RequestBody String verification_code) {
         CommonResult commonResult=new CommonResult();
         String temp= (String) redisUtil.get(simpleUUID);
-        if(temp==verification_code){
+        if(temp.equals(verification_code)){
             commonResult.setCode("6666");
             commonResult.setMessage("操作成功！");
             return commonResult;
