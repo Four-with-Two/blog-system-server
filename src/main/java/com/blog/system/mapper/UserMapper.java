@@ -22,6 +22,9 @@ public interface UserMapper {
     @Insert("insert into user (user_name,mail,password) values (#{user_name},#{mail},#{password})")
     void insertUser(User user);
 
+    @Insert("insert into user (avatar_url)=#{avatar_url}")
+    void insertAvatar_url(String avatar_url);
+
     @Select("select * from user where user_name=#{user_name}")
     User findBySession_key(@Param("session_key") String user_name);
 
@@ -37,5 +40,4 @@ public interface UserMapper {
 
     @Delete("delete from user where id=#{id}")
     void delete(@Param("id") int id);
-
 }

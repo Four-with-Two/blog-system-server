@@ -4,19 +4,27 @@ import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.LineCaptcha;
 import cn.hutool.core.util.IdUtil;
 import com.blog.system.dto.CommonResult;
+import com.blog.system.dto.UploadPictureDTO;
 import com.blog.system.dto.UrlUUIDDTO;
 import com.blog.system.mapper.UserMapper;
 import com.blog.system.util.JwtUtil;
 import com.blog.system.util.RedisUtil;
-import io.jsonwebtoken.Claims;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/picture")
@@ -31,6 +39,9 @@ public class PictureController {
     @Autowired(required = false)
     private RedisUtil redisUtil;
 
+    @Value("E:/FOR_study/forPicture")
+    private String path;
+
     /**
      * 上传个人头像
      * @param token
@@ -38,52 +49,64 @@ public class PictureController {
      * @return
      */
     @PostMapping("/avatar/upload")
-    CommonResult<String> uploadPicture(@RequestHeader("token") String token,
-                                       @RequestParam("avatar")MultipartFile avatar){
+    CommonResult<UploadPictureDTO> uploadPicture(@RequestHeader("token") String token,
+                                                 @RequestParam("avatar")MultipartFile avatar){
         CommonResult commonResult=new CommonResult();
         if(jwtUtil.isVerify(token)){
-            if(!avatar.isEmpty()){
-                try{
-                    BufferedOutputStream out=new BufferedOutputStream(
-                            new FileOutputStream(new File(
-                                    avatar.getOriginalFilename())));
-                    out.write(avatar.getBytes());
-                    out.flush();
-                    out.close();
-                    commonResult.setCode("6666");
-                    commonResult.setMessage("操作成功！");
-                    return commonResult;
-                } catch (IOException e) {
+            UploadPictureDTO uploadPictureDTO=new UploadPictureDTO();
+            //1.判断文件是否为图片类型
+            String fileName=avatar.getOriginalFilename();
+            fileName=fileName.toLowerCase(); //解决文件名后缀是大写的
+            if(!fileName.matches("^.+\\.(jpg|png)$")){
+                commonResult.setCode("2001");
+                commonResult.setMessage("图片上传失败！");
+                return commonResult;
+            }
+            //2.判断是否为恶意程序,转化成为图片对象
+            try{
+                BufferedImage bufferedImage=
+                        ImageIO.read(avatar.getInputStream());
+                int width=bufferedImage.getWidth();
+                int height=bufferedImage.getHeight();
+                if(width==0||height==0){
                     commonResult.setCode("2001");
                     commonResult.setMessage("图片上传失败！");
                     return commonResult;
                 }
-            }
-            else{
+                //3.实现份文件存储 按照yyyy/MM/dd
+                String dateDir=new SimpleDateFormat("yyyy/MM/dd/")
+                        .format(new Date());
+                String fileDirPath=path+dateDir;
+                File dirFile=new File(fileDirPath);
+                if(!dirFile.exists()){
+                    dirFile.mkdirs();
+                }
+                //4.生成文件防止重名 name.type
+                int index=fileName.lastIndexOf(".");
+                String fileType=fileName.substring(index);
+                String uuid= UUID.randomUUID().toString();
+                String realFileName=uuid+fileType;
+                //5.文件实现上传
+                File avatarFile=new File(fileDirPath+realFileName);
+                avatar.transferTo(avatarFile);
+                uploadPictureDTO.setWidth(width);
+                uploadPictureDTO.setHeight(height);
+                uploadPictureDTO.setUrl(avatarFile.toURI().toURL());
+                String avatar_url=avatarFile.toURI().toURL().toString();
+                userMapper.insertAvatar_url(avatar_url);
+                System.out.println(avatar_url);
+                commonResult.setData(uploadPictureDTO);
+                commonResult.setCode("6666");
+                commonResult.setMessage("操作成功！");
+            } catch (IOException e) {
                 commonResult.setCode("2001");
                 commonResult.setMessage("图片上传失败！");
                 return commonResult;
             }
         }
-        else{
-            commonResult.setCode("1006");
-            commonResult.setMessage("用户无有效令牌!");
-            return commonResult;
-        }
-//        if(true==jwtUtil.isVerify(token)){
-//            String user_name=jwtUtil.parseJWT(token);
-//            String avatar_url=(avatar.toURI()).getPath();
-//            userMapper.updatePicture(avatar_url,user_name);
-//            commonResult.setData(avatar_url);
-//            commonResult.setCode("6666");
-//            commonResult.setMessage("操作成功！");
-//            return commonResult;
-//        }
-//        else{
-//            commonResult.setCode("1006");
-//            commonResult.setMessage("用户无有效令牌!");
-//            return commonResult;
-//        }
+        commonResult.setCode("1006");
+        commonResult.setMessage("用户无有效令牌！");
+        return commonResult;
     }
 
     /**
@@ -96,13 +119,6 @@ public class PictureController {
     CommonResult changePicture(@RequestHeader("token") String token,
                                @RequestBody String avatar_url){
         CommonResult commonResult=new CommonResult();
-
-//        System.out.println("token:"+token);
-//        System.out.println("avatar_url"+avatar_url);
-//        commonResult.setCode("6666");
-//        commonResult.setMessage("操作成功！");
-//        return commonResult;
-
         if(true==jwtUtil.isVerify(token)){
             String user_name=jwtUtil.parseJWT(token);
             userMapper.updatePicture(avatar_url,user_name);
@@ -125,14 +141,6 @@ public class PictureController {
     @GetMapping("/avatar")
     CommonResult<String> getPicture(@RequestHeader("token") String token){
         CommonResult commonResult=new CommonResult();
-
-//        System.out.println("token"+token);
-//        String avatar_url="http://riyugo.com/i/2020/11/13/pfet0w.jpg";
-//        commonResult.setData(avatar_url);
-//        commonResult.setCode("6666");
-//        commonResult.setMessage("操作成功！");
-//        return commonResult;
-
         if(true==jwtUtil.isVerify(token)){
             String user_name=jwtUtil.parseJWT(token);
             String avatar_url=userMapper.getAvatar(user_name);
@@ -157,13 +165,25 @@ public class PictureController {
         CommonResult commonResult=new CommonResult();
         LineCaptcha lineCaptcha = CaptchaUtil.createLineCaptcha(112, 38);
         try {
-
-            URL captcha= new URL("http","/picture/captcha",80,lineCaptcha.toString());
             String verification_code=lineCaptcha.getCode();
             String simpleUUID = IdUtil.simpleUUID();
+            //文件实现上传
+            String dateDir=new SimpleDateFormat("yyyy/MM/dd/")
+                    .format(new Date());
+            String fileDirPath=path+dateDir;
+            File dirFile=new File(fileDirPath);
+            if(!dirFile.exists()){
+                dirFile.mkdirs();
+            }
+            String realFileName=simpleUUID;
+            File avatarFile=new File(fileDirPath+realFileName);
+            lineCaptcha.write(avatarFile);
             redisUtil.set(simpleUUID,verification_code);
             UrlUUIDDTO urlUUIDDTO=new UrlUUIDDTO();
-            urlUUIDDTO.setUrl(captcha);
+            urlUUIDDTO.setUrl(avatarFile.toURI().toURL());
+            System.out.println(verification_code);
+            System.out.println(simpleUUID);
+            System.out.println(urlUUIDDTO.getUrl());
             urlUUIDDTO.setUuid(simpleUUID);
             commonResult.setData(urlUUIDDTO);
             commonResult.setCode("6666");
