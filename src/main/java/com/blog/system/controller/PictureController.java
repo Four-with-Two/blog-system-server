@@ -39,7 +39,7 @@ public class PictureController {
     @Autowired(required = false)
     private RedisUtil redisUtil;
 
-    @Value("E:/FOR_study/forPicture")
+    @Value("/project/blog/forPicture")
     private String path;
 
     /**

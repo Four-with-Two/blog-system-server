@@ -42,3 +42,5 @@ spring:
   cache:
     type: redis
     #cache-names: common
+  profiles:
+    active: prod

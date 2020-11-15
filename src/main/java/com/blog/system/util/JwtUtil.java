@@ -25,8 +25,8 @@ public class JwtUtil {
     /**
      * 用户登录成功后生成Jwt
      * 使用Hs256算法 私钥是使用用户密码
-     * @param ttlMillis
-     * @param user
+     * @param ttlMillis 令牌的有效时间（单位为毫秒）
+     * @param user 用户模型
      * @return
      */
     public String createJWT(long ttlMillis, User user){
@@ -57,7 +57,7 @@ public class JwtUtil {
     /**
      * Token的解密,返回user_name
      * @param token 加密后的token
-     * @return
+     * @return 用户名
      */
     public String parseJWT(String token) {
         //签名秘钥，和生成的签名的秘钥一模一样
@@ -76,8 +76,8 @@ public class JwtUtil {
     /**
      * 校验token
      * 在这里可以使用官方的校验，我这里校验的是token中携带的密码于数据库一致的话就校验通过
-     * @param token
-     * @return
+     * @param token 令牌
+     * @return true为
      */
     public Boolean isVerify(String token) {
         //签名秘钥，和生成的签名的秘钥一模一样
