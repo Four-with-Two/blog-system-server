@@ -22,6 +22,9 @@ public class JwtUtil {
     @Value("${acceptToken}")
     private String acceptToken;
 
+    @Value("123456")
+    private  String password;
+
     /**
      * 用户登录成功后生成Jwt
      * 使用Hs256算法 私钥是使用用户密码
@@ -37,6 +40,7 @@ public class JwtUtil {
 
         Map<String,Object> claims=new HashMap<String,Object>();
         claims.put("user_name",user.getUser_name());
+        claims.put("password",password);
         String key=acceptToken;
         String subject=user.getUser_name();
 
@@ -90,7 +94,7 @@ public class JwtUtil {
                 //设置需要解析的jwt
                 .parseClaimsJws(token).getBody();
 
-        if (claims.get("password").equals(acceptToken)) {
+        if (claims.get("password").equals(password)) {
             return true;
         }
         return false;
