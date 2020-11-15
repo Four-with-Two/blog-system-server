@@ -6,6 +6,7 @@ import com.blog.system.dto.SendUserDTO;
 import com.blog.system.mapper.PersonalDataMapper;
 import com.blog.system.mapper.UserMapper;
 import com.blog.system.model.User;
+import com.blog.system.util.JwtUtil;
 import com.blog.system.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,9 +30,12 @@ public class UserController {
     @Autowired
     RedisUtil redisUtil;
 
+    @Autowired
+    JwtUtil jwtUtil;
+
     //用户登录功能:验证成功返回用户id 验证失败返回错误信息
     @PostMapping("/login")
-    public String login(@RequestBody User user, HttpServletRequest request) {
+    public String login(@RequestBody User user) {
         if (user.getMail() == null && user.getUser_name() == null || user.getPassword() == null) {
             SendStringDTO sendStringDTO=new SendStringDTO();
             sendStringDTO.setCode(false);
@@ -47,14 +51,7 @@ public class UserController {
             sendStringDTO.setMessage("The account does not exist");
             return JSON.toJSONString(sendStringDTO);
         } else if (findUser.getPassword().equals(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()))) {
-            request.getSession().setAttribute("id", user.getId());
-            SendUserDTO sendUserDTO = new SendUserDTO();
-            sendUserDTO.setCode(true);
-            if(user.getNick_name()==null||user.getNick_name().length()==0)
-                sendUserDTO.setName(user.getUser_name());
-            else sendUserDTO.setName(user.getNick_name());
-            sendUserDTO.setAvatar_url(user.getAvatar_url());
-            return JSON.toJSONString(sendUserDTO);
+            return JSON.toJSONString(jwtUtil.createJWT(1000*60*60*24,findUser));
         } else {
             SendStringDTO sendStringDTO = new SendStringDTO();
             sendStringDTO.setCode(false);
@@ -83,35 +80,16 @@ public class UserController {
 
     //删除用户:删除数据库的用户信息
     @GetMapping("/delete")
-    public String delete(HttpServletRequest request) {
-        if(request.getSession().getAttribute("id")==null) {
+    public String delete(@RequestHeader("token") String token) {
+        if(token==null||jwtUtil.parseJWT(token)==null) {
             SendStringDTO sendStringDTO=new SendStringDTO();
             sendStringDTO.setCode(false);
             sendStringDTO.setMessage("User not logged in");
             return JSON.toJSONString(sendStringDTO);
         }
-        int id=(int)request.getSession().getAttribute("id");
-        User user=userMapper.findByID(id);
-        userMapper.delete(id);
-        personalDataMapper.delete(user.getUser_name());
-        request.getSession().removeAttribute("id");
-        SendStringDTO sendStringDTO = new SendStringDTO();
-        sendStringDTO.setCode(true);
-        sendStringDTO.setMessage("OK");
-        return JSON.toJSONString(sendStringDTO);
-    }
-
-    //登出
-    @GetMapping("/logout")
-    public String logout(HttpServletRequest request) {
-        if(request.getSession().getAttribute("id")==null) {
-            SendStringDTO sendStringDTO=new SendStringDTO();
-            sendStringDTO.setCode(false);
-            sendStringDTO.setMessage("User not logged in");
-            return JSON.toJSONString(sendStringDTO);
-        }
-        int id=(int)request.getSession().getAttribute("id");
-        request.getSession().removeAttribute("id");
+        String user_name=jwtUtil.parseJWT(token);
+        userMapper.deleteByUser_name(user_name);
+        personalDataMapper.delete(user_name);
         SendStringDTO sendStringDTO = new SendStringDTO();
         sendStringDTO.setCode(true);
         sendStringDTO.setMessage("OK");

@@ -9,6 +9,7 @@ import com.blog.system.mapper.BlogMapper;
 import com.blog.system.mapper.UserMapper;
 import com.blog.system.model.Blog;
 import com.blog.system.service.BlogService;
+import com.blog.system.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -29,10 +30,13 @@ public class BlogController {
     @Autowired
     UserMapper userMapper;
 
+    @Autowired
+    JwtUtil jwtUtil;
+
     //写博客:将新博客写入数据库中，检查作者存不存在，不存在则返回错误信息
     @PostMapping("/newBlog")
-    public String newBlog(@RequestBody Blog blog, HttpServletRequest request) {
-        if(request.getSession().getAttribute("id")==null) {
+    public String newBlog(@RequestHeader("token") String token,@RequestBody Blog blog) {
+        if(token==null||jwtUtil.parseJWT(token)==null) {
             SendStringDTO sendStringDTO=new SendStringDTO();
             sendStringDTO.setCode(false);
             sendStringDTO.setMessage("User not logged in");
@@ -106,8 +110,8 @@ public class BlogController {
 
     //删除博客:删除数据库中对应博客id的博客信息
     @GetMapping("/delete")
-    public String delete(@RequestParam("id") int id,HttpServletRequest request) {
-        if(request.getSession().getAttribute("id")==null) {
+    public String delete(@RequestHeader("token") String token,@RequestParam("id") int id,HttpServletRequest request) {
+        if(token==null||jwtUtil.parseJWT(token)==null) {
             SendStringDTO sendStringDTO=new SendStringDTO();
             sendStringDTO.setCode(false);
             sendStringDTO.setMessage("User not logged in");
@@ -122,8 +126,8 @@ public class BlogController {
 
     //修改博客:修改数据库中对应博客id的博客信息，若博客不存在则返回错误信息
     @PostMapping("/modify")
-    public String modify(@RequestParam("id") int id,@RequestBody Blog blog,HttpServletRequest request) {
-        if(request.getSession().getAttribute("id")==null) {
+    public String modify(@RequestHeader("token") String token,@RequestParam("id") int id,@RequestBody Blog blog,HttpServletRequest request) {
+        if(token==null||jwtUtil.parseJWT(token)==null) {
             SendStringDTO sendStringDTO=new SendStringDTO();
             sendStringDTO.setCode(false);
             sendStringDTO.setMessage("User not logged in");
