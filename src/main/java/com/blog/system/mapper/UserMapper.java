@@ -35,7 +35,6 @@ public interface UserMapper {
     @Update("update table user set avatar_url=#{avatar_url} where user_name=#{user_name}")
     void updatePicture(@Param("avatar_url")String avatar_url,@Param("user_name")String user_name);
 
-    @Delete("delete from user where id=#{id}")
-    void delete(@Param("id") int id);
-
+    @Delete("delete from user where user_name=#{user_name}")
+    void deleteByUser_name(@Param("user_name") String user_name);
 }
