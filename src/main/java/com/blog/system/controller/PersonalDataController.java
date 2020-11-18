@@ -29,17 +29,17 @@ public class PersonalDataController {
     /**
      * 初始化或修改密码
      * @param token
-     * @param password
+     * @param passwordDTO
      * @return
      */
     @PatchMapping("/pwdAlteration")
     CommonResult pwdAlteration(@RequestHeader("token") String token,
-                               @RequestBody String password){
+                               @RequestBody PasswordDTO passwordDTO){
         CommonResult commonResult=new CommonResult();
         if(jwtUtil.isVerify(token)==true){
             String user_name=jwtUtil.parseJWT(token);
             User user=userMapper.findByUser_name(user_name);
-            userMapper.updateByUser_name(user_name,password);
+            userMapper.updateByUser_name(user_name,passwordDTO.getPassword());
             long ttlMillis=System.currentTimeMillis();
             String newToken=jwtUtil.createJWT(ttlMillis,user);
             commonResult.setData(newToken);
