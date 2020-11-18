@@ -82,6 +82,19 @@ public class BlogController {
         return JSON.toJSONString(blogService.getBlogs(id, page));
     }
 
+    //获取当前用户的博客:需要指定页数，返回List数据结构，按发布时间排序
+    @GetMapping("/get/myBlogs")
+    public String getMyBlogs(@RequestHeader("token") String token, @RequestParam("page") int page) {
+        if(token==null||jwtUtil.parseJWT(token)==null) {
+            SendStringDTO sendStringDTO=new SendStringDTO();
+            sendStringDTO.setCode(false);
+            sendStringDTO.setMessage("User not logged in");
+            return JSON.toJSONString(sendStringDTO);
+        }
+        String user_name=jwtUtil.parseJWT(token);
+        return JSON.toJSONString(blogService.getBlogs(userMapper.findByUser_name(user_name).getId(), page));
+    }
+
     //获取所有用户的博客:从数据库中获取所有博客，需要指定页数，返回List数据结构，按发布时间排序
     @GetMapping("/get/all")
     public String getAll(@RequestParam("page") int page) {
