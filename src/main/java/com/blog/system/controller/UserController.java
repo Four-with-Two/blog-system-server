@@ -9,13 +9,10 @@ import com.blog.system.model.User;
 import com.blog.system.util.JwtUtil;
 import com.blog.system.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/user")
@@ -68,7 +65,7 @@ public class UserController {
         if (findUser == null) {
             user.setPassword(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()));
             userMapper.insertUser(user);
-            personalDataMapper.inserUser(user);
+            personalDataMapper.insertUser(user);
             sendStringDTO.setCode(true);
             sendStringDTO.setMessage("OK");
         } else {

@@ -8,5 +8,5 @@ import java.net.URL;
 public class UploadPictureDTO {
     private int width;
     private int height;
-    private URL url;
+    private String url;
 }

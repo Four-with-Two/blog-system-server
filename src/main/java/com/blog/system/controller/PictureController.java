@@ -6,10 +6,10 @@ import cn.hutool.core.util.IdUtil;
 import com.blog.system.dto.CommonResult;
 import com.blog.system.dto.UploadPictureDTO;
 import com.blog.system.dto.UrlUUIDDTO;
+import com.blog.system.dto.VeriCodeDTO;
 import com.blog.system.mapper.UserMapper;
 import com.blog.system.util.JwtUtil;
 import com.blog.system.util.RedisUtil;
-import org.apache.ibatis.annotations.Update;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -19,11 +19,8 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -39,7 +36,7 @@ public class PictureController {
     @Autowired(required = false)
     private RedisUtil redisUtil;
 
-    @Value("/project/blog/forPicture")
+    @Value("classpath:static")
     private String path;
 
     /**
@@ -70,7 +67,7 @@ public class PictureController {
                 int height=bufferedImage.getHeight();
                 if(width==0||height==0){
                     commonResult.setCode("2001");
-                    commonResult.setMessage("图片上传失败！");
+                    commonResult.setMessage("图片恶意上传！");
                     return commonResult;
                 }
                 //3.实现份文件存储 按照yyyy/MM/dd
@@ -91,14 +88,16 @@ public class PictureController {
                 avatar.transferTo(avatarFile);
                 uploadPictureDTO.setWidth(width);
                 uploadPictureDTO.setHeight(height);
-                uploadPictureDTO.setUrl(avatarFile.toURI().toURL());
-                String avatar_url=avatarFile.toURI().toURL().toString();
-                userMapper.insertAvatar_url(avatar_url);
+                uploadPictureDTO.setUrl(dateDir + File.separatorChar + realFileName);
+                String avatar_url=dateDir + File.separatorChar + realFileName;
+                String user_name=jwtUtil.parseJWT(token);
+                userMapper.updateAvatar_url(avatar_url,user_name);
                 System.out.println(avatar_url);
                 commonResult.setData(uploadPictureDTO);
                 commonResult.setCode("6666");
                 commonResult.setMessage("操作成功！");
             } catch (IOException e) {
+                e.printStackTrace();
                 commonResult.setCode("2001");
                 commonResult.setMessage("图片上传失败！");
                 return commonResult;
@@ -181,10 +180,10 @@ public class PictureController {
             redisUtil.set(simpleUUID,verification_code);
             UrlUUIDDTO urlUUIDDTO=new UrlUUIDDTO();
             urlUUIDDTO.setUrl(avatarFile.toURI().toURL());
-            System.out.println(verification_code);
-            System.out.println(simpleUUID);
-            System.out.println(urlUUIDDTO.getUrl());
             urlUUIDDTO.setUuid(simpleUUID);
+//            System.out.println(verification_code);
+//            System.out.println(simpleUUID);
+//            System.out.println(urlUUIDDTO.getUrl());
             commonResult.setData(urlUUIDDTO);
             commonResult.setCode("6666");
             commonResult.setMessage("操作成功！");
@@ -199,15 +198,15 @@ public class PictureController {
     /**
      * 校验输入的验证码
      * @param simpleUUID
-     * @param verification_code
+     * @param
      * @return
      */
     @PostMapping("/verification")
     CommonResult verification(@RequestHeader("simpleUUID")String simpleUUID,
-                              @RequestBody String verification_code) {
+                              @RequestBody VeriCodeDTO veriCodeDTO) {
         CommonResult commonResult=new CommonResult();
         String temp= (String) redisUtil.get(simpleUUID);
-        if(temp.equals(verification_code)){
+        if(temp.equals(veriCodeDTO.getVerification_code())){
             commonResult.setCode("6666");
             commonResult.setMessage("操作成功！");
             return commonResult;
