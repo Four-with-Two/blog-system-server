@@ -11,6 +11,7 @@ public class SendBlogDTO {
     private String bio;
     private String title;
     private String content;
+    private String summary;
     private String publish_date;
     private String update_date;
 }
