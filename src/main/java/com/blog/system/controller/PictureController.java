@@ -124,7 +124,6 @@ public class PictureController {
     }
 
     // 获取图形验证码
-
     @GetMapping("/captcha")
     CommonResult<UrlUUIDDTO> getCaptcha() {
         CommonResult commonResult=new CommonResult();
@@ -140,12 +139,12 @@ public class PictureController {
             if(!dirFile.exists()){
                 dirFile.mkdirs();
             }
-            String realFileName=simpleUUID;
+            String realFileName=simpleUUID+".jpg";
             File avatarFile=new File(fileDirPath+realFileName);
             lineCaptcha.write(avatarFile);
-            redisUtil.set(simpleUUID,verification_code);
+            redisUtil.set(simpleUUID,verification_code,60);
             UrlUUIDDTO urlUUIDDTO=new UrlUUIDDTO();
-            urlUUIDDTO.setUrl(avatarFile.toURI().toURL());
+            urlUUIDDTO.setUrl(domain+"/avatar/"+dateDir+realFileName);
             urlUUIDDTO.setUuid(simpleUUID);
 //            System.out.println(verification_code);
 //            System.out.println(simpleUUID);
@@ -154,7 +153,7 @@ public class PictureController {
             commonResult.setCode("6666");
             commonResult.setMessage("操作成功！");
             return commonResult;
-        } catch (MalformedURLException e) {
+        } catch (Exception e) {
             commonResult.setCode("5555");
             commonResult.setMessage("图形验证码创建失败");
             return commonResult;
@@ -168,20 +167,26 @@ public class PictureController {
      * @return
      */
     @PostMapping("/verification")
-    CommonResult verification(@RequestHeader("simpleUUID")String simpleUUID,
+    String verification(@RequestHeader("simpleUUID")String simpleUUID,
                               @RequestBody VeriCodeDTO veriCodeDTO) {
         CommonResult commonResult=new CommonResult();
         String temp= (String) redisUtil.get(simpleUUID);
+        if(temp==null) {
+            SendStringDTO sendStringDTO = new SendStringDTO();
+            sendStringDTO.setCode(false);
+            sendStringDTO.setMessage("verification code expiration");
+            return JSON.toJSONString(sendStringDTO);
+        }
         if(temp.equals(veriCodeDTO.getVerification_code())){
-            commonResult.setCode("6666");
-            commonResult.setMessage("操作成功！");
-            return commonResult;
+            SendStringDTO sendStringDTO = new SendStringDTO();
+            sendStringDTO.setCode(true);
+            sendStringDTO.setMessage("ok");
+            return JSON.toJSONString(sendStringDTO);
         }
-        else{
-            commonResult.setCode("2003");
-            commonResult.setMessage("验证失败！");
-            return commonResult;
-        }
+        SendStringDTO sendStringDTO = new SendStringDTO();
+        sendStringDTO.setCode(false);
+        sendStringDTO.setMessage("Captcha failed");
+        return JSON.toJSONString(sendStringDTO);
     }
 
 }

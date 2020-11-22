@@ -6,6 +6,6 @@ import java.net.URL;
 
 @Data
 public class UrlUUIDDTO {
-    private URL url;
+    private String url;
     private String uuid;
 }
