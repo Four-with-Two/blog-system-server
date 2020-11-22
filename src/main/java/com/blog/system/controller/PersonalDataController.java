@@ -8,6 +8,7 @@ import com.blog.system.model.User;
 import com.blog.system.service.OtherDataService;
 import com.blog.system.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -39,7 +40,7 @@ public class PersonalDataController {
         if(jwtUtil.isVerify(token)==true){
             String user_name=jwtUtil.parseJWT(token);
             User user=userMapper.findByUser_name(user_name);
-            userMapper.updateByUser_name(user_name,passwordDTO.getPassword());
+            userMapper.updateByUser_name(user_name, DigestUtils.md5DigestAsHex(passwordDTO.getPassword().getBytes()));
             long ttlMillis=System.currentTimeMillis();
             String newToken=jwtUtil.createJWT(ttlMillis,user);
             commonResult.setData(newToken);

@@ -28,7 +28,8 @@ public interface UserMapper {
     @Update("update user set password=#{password} where user_name=#{user_name}")
     void  updateByUser_name(@Param("user_name") String user_name,@Param("password")String password);
 
-    @Update("update user set nick_name=#{nick_name},gender=#{gender},mail=#{mail},birthday=#{birthday},phone=#{phone}" +
+    @Update("update user set nick_name=#{nick_name},gender=#{gender},mail=#{mail},birthday=#{birthday}," +
+            "phone=#{phone},bio=#{profile}" +
             "where user_name=#{user_name}")
     void updateData(PersonalData personalData);
 

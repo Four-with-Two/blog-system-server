@@ -36,6 +36,7 @@ public class BlogService {
         sendBlogDTO.setBio(findUser.getBio());
         sendBlogDTO.setTitle(findBlog.getTitle());
         sendBlogDTO.setContent(findBlog.getContent());
+        sendBlogDTO.setSummary(findBlog.getSummary());
         sendBlogDTO.setPublish_date(findBlog.getPublish_date());
         sendBlogDTO.setUpdate_date(findBlog.getUpdate_date());
         return sendBlogDTO;
@@ -49,10 +50,8 @@ public class BlogService {
             for (Blog blog : blogList) {
                 BlogsDTO blogsDTO = new BlogsDTO();
                 blogsDTO.setId(blog.getId());
-                if (id <= 0) {
-                    user = userMapper.findByID(blog.getAuthor());
-                    blogsDTO.setAuthor(user.getId());
-                }
+                if (id <= 0) user = userMapper.findByID(blog.getAuthor());
+                blogsDTO.setAuthor(user.getId());
                 blogsDTO.setAvatar_url(user.getAvatar_url());
                 if (user.getNick_name() != null && user.getNick_name().length() == 0)
                     blogsDTO.setName(user.getNick_name());

@@ -60,9 +60,10 @@ public class UserController {
     //用户注册功能:若注册成功则将用户信息添加进数据库 返回注册状态
     @PostMapping("/register")
     public String register(@RequestBody User user) {
-        User findUser = userMapper.findByMail(user.getMail());
+        User findMailUser = userMapper.findByMail(user.getMail());
+        User findUserNameUser = userMapper.findByUser_name(user.getUser_name());
         SendStringDTO sendStringDTO = new SendStringDTO();
-        if (findUser == null) {
+        if (findMailUser == null && findUserNameUser == null) {
             user.setPassword(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()));
             userMapper.insertUser(user);
             personalDataMapper.insertUser(user);

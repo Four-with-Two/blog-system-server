@@ -3,10 +3,10 @@ spring:
   datasource:
     #公共属性
     name: Druid
-#    username: root
-#    password: 123456
-#    url: jdbc:mysql://localhost:3306/blog?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8
-#    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: GDUTmall-2020
+    url: jdbc:mysql://localhost:3306/blog?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8
+    driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
     #Druid特有属性
     initialSize: 5
@@ -30,7 +30,7 @@ spring:
   redis:
     host: 127.0.0.1
     port: 6379
-    password: 123456
+    #password: 123456
     jedis:
       pool:
         max-active: 8

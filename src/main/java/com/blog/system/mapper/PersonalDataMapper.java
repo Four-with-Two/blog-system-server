@@ -11,9 +11,9 @@ public interface PersonalDataMapper {
     @Select("select * from personal_data where user_name=#{user_name}")
     PersonalData findByUser_name(@Param("user_name")String user_name);
 
-    @Update("update personal_data set (nick_name,gender,profile,mail,birthday,phone) " +
-            "values (#{nick_name},#{gender}),#{profile},#{mail},#{birthday},#{phone}" +
-            "where user_name=#{user_name}" )
+    @Update("update personal_data set nick_name=#{nick_name},gender=#{gender}," +
+            "profile=#{profile},mail=#{mail},birthday=#{birthday},phone=#{phone} " +
+            "where user_name=#{user_name}")
     void updatePersonalData(PersonalData personalData);
 
     @Insert("insert into personal_data (user_name,mail) " +
