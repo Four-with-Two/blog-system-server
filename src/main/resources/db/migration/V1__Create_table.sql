@@ -21,7 +21,7 @@ create table user
     birthday   char(20)     null,
     gender     char(2)      null,
     bio        varchar(200) null,
-    avatar_url varchar(50)  null,
+    avatar_url varchar(256)  null,
     phone      char(20)     null,
     constraint user_mail_uindex
         unique (mail),

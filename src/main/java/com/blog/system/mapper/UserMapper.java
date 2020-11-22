@@ -19,7 +19,7 @@ public interface UserMapper {
     @Select("Select * from user where user_name=#{user_name}")
     User findByUser_name(@Param("user_name") String user_name);
 
-    @Insert("insert into user (user_name,mail,password) values (#{user_name},#{mail},#{password})")
+    @Insert("insert into user (user_name,mail,password,avatar_url) values (#{user_name},#{mail},#{password},#{avatar_url})")
     void insertUser(User user);
 
     @Update("update user set avatar_url=#{avatar_url} where user_name=#{user_name}")

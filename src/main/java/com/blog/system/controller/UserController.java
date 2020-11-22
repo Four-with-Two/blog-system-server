@@ -9,6 +9,7 @@ import com.blog.system.model.User;
 import com.blog.system.util.JwtUtil;
 import com.blog.system.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,9 @@ public class UserController {
 
     @Autowired
     JwtUtil jwtUtil;
+
+    @Value("${domain}")
+    String domain;
 
     //用户登录功能:验证成功返回用户id 验证失败返回错误信息
     @PostMapping("/login")
@@ -65,6 +69,7 @@ public class UserController {
         SendStringDTO sendStringDTO = new SendStringDTO();
         if (findMailUser == null && findUserNameUser == null) {
             user.setPassword(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()));
+            user.setAvatar_url(domain+"/avatar/"+"default.png");
             userMapper.insertUser(user);
             personalDataMapper.insertUser(user);
             sendStringDTO.setCode(true);
